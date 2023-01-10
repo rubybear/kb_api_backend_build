@@ -1,0 +1,16 @@
+{
+  "username": "rubybear",
+  "workouts": {
+    "workout_id": {
+      "exercise_name": {
+        "exercise_meta": [
+          "sets",
+          "reps",
+          "weight",
+          "type",
+          "completed"
+        ]
+      }
+    }
+  }
+}
