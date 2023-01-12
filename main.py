@@ -87,13 +87,20 @@ class ExercisesModel(BaseModel):
         }
 
 
-@app.post("/mongotest", response_description="add new exercise", response_model=ExercisesModel)
+@app.post("/exercises/create", response_description="Add new exercise", response_model=ExercisesModel)
 async def create_exercises(exercises: ExercisesModel = Body()):
     exercises = jsonable_encoder(exercises)
     new_exercises = await db["exercises"].insert_one(exercises)
     created_exercises = await db["exercises"].find_one({"_id": new_exercises.inserted_id})
 
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_exercises)
+
+
+# @app.get("/exercises/list_exercises/{id}", response_description="List all exercises", response_model=ExerciseModel)
+# async def list_exercises(id: str):
+#     if exercises := await db["exercises"].find_one({"_id": id})
+#     is not None:
+#         return exercises
 
 
 class ExerciseSet(BaseModel):
