@@ -70,7 +70,7 @@ class ExerciseModel(BaseModel):
         }
 
 
-class ExercisesModel(BaseModel):
+class WorkoutModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     exercises: List[ExerciseModel]
 
@@ -101,54 +101,17 @@ class ExercisesModel(BaseModel):
         }
 
 
-@app.post("/exercises/create", response_description="Add new exercise", response_model=ExercisesModel)
-async def create_exercises(exercises: ExercisesModel = Body()):
+@app.post("/exercises/create", response_description="Add new exercise", response_model=WorkoutModel)
+async def create_exercises(exercises: WorkoutModel = Body()):
     exercises = jsonable_encoder(exercises)
     new_exercises = await db["exercises"].insert_one(exercises)
-    created_exercises = await db["exercises"].find_one({"_id": new_exercises.inserted_id})
+    inserted_id = new_exercises.inserted_id
+    created_exercises = await db["exercises"].find_one({"_id": inserted_id})
 
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_exercises)
 
 
-# @app.get("/exercises/list_exercises/{id}", response_description="List all exercises", response_model=ExerciseModel)
-# async def list_exercises(id: str):
-#     if exercises := await db["exercises"].find_one({"_id": id})
-#     is not None:
-#         return exercises
-
-
-class ExerciseSet(BaseModel):
-    set_number: int
-    reps: int
-    weight: float
-
-
-class Exercise(BaseModel):
-    name: str
-    exercise_set: list[ExerciseSet]
-
-
-class ExercisesStored(BaseModel):
-    exercise_id: str
-    exercise: Exercise
-
-
-sampleExercise = Exercise(
-    name="test",
-    exercise_set=[
-        ExerciseSet(set_number=1, reps=10, weight=100.5),
-        ExerciseSet(set_number=2, reps=10, weight=100.5)]
-)
-
-sampleData = dict(ExercisesStored(exercise_id="sample_1", exercise=sampleExercise))
-templates = Jinja2Templates(directory='templates')
-
-
-@app.get("/exercises/")
-async def get_exercises(q: str | None = None):
-    return sampleExercise
-
-
-@app.put('/exercises/{exercise_id}')
-async def update_exercise(exercise_id: str, exercise: Exercise):
-    return templates.TemplateResponse("form.html", {"exercise_id": exercise_id, "exercise": exercise})
+@app.get("/exercises/get_current_workout/{workout_id}", response_description="List current workout", response_model=WorkoutModel)
+async def list_exercises(workout_id: str):
+    if (workout := await db["exercises"].find_one({"_id": workout_id})) is not None:
+        return workout
