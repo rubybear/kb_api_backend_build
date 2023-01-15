@@ -39,7 +39,7 @@ class PyObjectId(ObjectId):
     @classmethod
     def validate(cls, v):
         if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
+            raise ValueError("Invalid ObjectId")
         return ObjectId(v)
 
     @classmethod
@@ -71,7 +71,7 @@ class ExerciseModel(BaseModel):
 
 
 class WorkoutModel(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    workout_id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     exercises: List[ExerciseModel]
 
     class Config:
@@ -101,6 +101,42 @@ class WorkoutModel(BaseModel):
         }
 
 
+class ExerciseActualModel(BaseModel):
+    exercise_id: str
+    actual_reps: List[int]
+    actual_sets: int
+    weight: List[int]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {"exercise_id": "63b767985156fb9741e62abd",
+                        "actual_reps": [10, 10, 9],
+                        "actual_sets": 3,
+                        "weight": [200, 195, 195]
+                        }
+
+
+class WorkoutActualModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    workout_id: str
+    exercise_data: List[ExerciseActualModel]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {"workout_id": "63b767985156fb9741e62abc",
+                        "exercise_date": [
+                            {"exercise_id": "63b767985156fb9741e62abd",
+                             "actual_reps": [10, 10, 9],
+                             "actual_sets": 3,
+                             "weight": [200, 195, 195]
+                             }
+                        ]}
+
+
 @app.post("/exercises/create", response_description="Add new exercise", response_model=WorkoutModel)
 async def create_exercises(exercises: WorkoutModel = Body()):
     exercises = jsonable_encoder(exercises)
@@ -118,3 +154,14 @@ async def list_exercises(workout_id: str):
         return workout
 
     raise HTTPException(status_code=404, detail=f"Workout {workout_id} not found")
+
+
+@app.post("/exercises/track_workout/create", response_description="Track Current Workout",
+          response_model=WorkoutActualModel)
+async def track_workout(workout: WorkoutActualModel = Body()):
+    workout = jsonable_encoder(workout)
+    new_workout = await db["workouts"].insert_one(workout)
+    inserted_workout_id = new_workout.inserted_id
+    created_workout = await db["workouts"].find_one({"_id": inserted_workout_id})
+
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_workout)
