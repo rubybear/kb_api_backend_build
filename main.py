@@ -1,18 +1,32 @@
-from typing import List
+from typing import List, Optional
 
 import motor.motor_asyncio
 from bson import ObjectId
 from fastapi import FastAPI, Body
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, BaseSettings, validator, root_validator
 from starlette import status
 from starlette.responses import JSONResponse
 
+
+class Settings(BaseSettings):
+    db_admin_username: str
+    db_password: str
+    db_uri: Optional[str] = None
+
+    @validator('db_uri', always=True)
+    def validate_uri(cls, v, values) -> str:
+        admin = values['db_admin_username']
+        password = values['db_password']
+        return f"mongodb+srv://{admin}:{password}@cluster0.wr4ucuo.mongodb.net/?retryWrites=true&w=majority"
+
+
+settings = Settings()
 app = FastAPI()
 
-conn_str = "mongodb+srv://admin:Bushdid911@cluster0.wr4ucuo.mongodb.net/?retryWrites=true&w=majority"
-
+conn_str = settings.db_uri
+motor.motor_asyncio.AsyncIOMotorClient()
 client = motor.motor_asyncio.AsyncIOMotorClient(conn_str, serverSelectionTimeoutMS=5000)
 db = client.kettlebell_barbell
 
