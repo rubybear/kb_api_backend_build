@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import motor.motor_asyncio
 from bson import ObjectId
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, BaseSettings, validator, root_validator
@@ -111,7 +111,10 @@ async def create_exercises(exercises: WorkoutModel = Body()):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_exercises)
 
 
-@app.get("/exercises/get_current_workout/{workout_id}", response_description="List current workout", response_model=WorkoutModel)
+@app.get("/exercises/get_current_workout/{workout_id}", response_description="List current workout",
+         response_model=WorkoutModel)
 async def list_exercises(workout_id: str):
     if (workout := await db["exercises"].find_one({"_id": workout_id})) is not None:
         return workout
+
+    raise HTTPException(status_code=404, detail=f"Workout {workout_id} not found")
