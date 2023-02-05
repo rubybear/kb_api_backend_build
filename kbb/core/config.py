@@ -7,10 +7,11 @@ from pydantic import AnyHttpUrl, BaseSettings, EmailStr, MongoDsn, validator
 
 MongoDsn.allowed_schemes.add("mongodb+srv")
 
+
 class Settings(BaseSettings):
     # Application
     PROJECT_NAME: str = "KB&B"
-    #PROJECT_VERSION: str = __version__
+    # PROJECT_VERSION: str = __version__
     API_V1_STR: str = "v1"
     DEBUG: bool = True
     BACKEND_CORS_ORIGINS: Union[str, List[AnyHttpUrl]] = []
@@ -38,8 +39,8 @@ class Settings(BaseSettings):
     # all standard pydantic validators.
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(
-        cls,  # noqa
-        v: Union[str, List[str]],
+            cls,  # noqa
+            v: Union[str, List[str]],
     ) -> Union[str, List[str]]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -48,13 +49,13 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     # Database
-    MONGODB_URI: MongoDsn = "mongodb+srv://admin:Bushdid911@cluster0.wr4ucuo.mongodb.net/?retryWrites=true&w=majority"  # type: ignore[assignment]
+    MONGODB_URI: MongoDsn  # type: ignore[assignment]
     MONGODB_DB_NAME: str = "kettlebell_barbell"
 
     # Superuser
-    FIRST_SUPERUSER: str = "admin"
-    FIRST_SUPERUSER_EMAIL: EmailStr = "admin@gmail.com"
-    FIRST_SUPERUSER_PASSWORD: str = "admin"
+    FIRST_SUPERUSER: str  # = "admin"
+    FIRST_SUPERUSER_EMAIL: EmailStr  # = "admin@gmail.com"
+    FIRST_SUPERUSER_PASSWORD: str  # = "admin"
 
     # Authentication
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 1  # 60 minutes * 24 hours * 1 = 1 day
@@ -65,7 +66,7 @@ class Settings(BaseSettings):
 
     class Config:
         # Place your .env file under this path
-        env_file = "kbb/.env"
+        env_file = "C:\\Users\\ruben\\PycharmProjects\\kb_api_backend\\kbb\\.env"
         env_prefix = "KBB_"
         case_sensitive = True
 
