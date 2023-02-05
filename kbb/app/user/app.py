@@ -2,7 +2,7 @@ from beanie import init_beanie
 from fastapi import FastAPI, Depends
 
 from kbb.app.user.db import user_db
-from kbb.kb_b.routers import get_kbb_router
+from kbb.kb_b.routers import  workout_router
 from kbb.app.user.auth import current_active_user, auth_backend
 from kbb.app.user.models import User, UserCreate, UserUpdate, UserRead
 from kbb.app.user.routers import fastapi_users
@@ -31,6 +31,12 @@ app.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix="/users",
     tags=["users"],
+)
+
+app.include_router(
+    workout_router,
+    prefix="/workout",
+    tags=["workouts"]
 )
 
 
