@@ -1,10 +1,10 @@
 from typing import List
 
-from beanie import PydanticObjectId
+from beanie import PydanticObjectId, Document
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
-class ExerciseModel(BaseModel):
+class ExerciseModel(Document):
     exercise_id: PydanticObjectId
     type: str = Field()
     name: str = Field()
@@ -27,7 +27,7 @@ class ExerciseModel(BaseModel):
         }
 
 
-class WorkoutModel(BaseModel):
+class WorkoutModel(Document):
     workout_id: PydanticObjectId
     exercises: List[ExerciseModel]
 
@@ -58,7 +58,7 @@ class WorkoutModel(BaseModel):
         }
 
 
-class ExerciseActualModel(BaseModel):
+class ExerciseActualModel(Document):
     exercise_id: str
     actual_reps: List[int]
     actual_sets: int
@@ -75,7 +75,7 @@ class ExerciseActualModel(BaseModel):
                         }
 
 
-class WorkoutActualModel(BaseModel):
+class WorkoutActualModel(Document):
     id: PydanticObjectId
     workout_id: str
     exercise_data: List[ExerciseActualModel]
