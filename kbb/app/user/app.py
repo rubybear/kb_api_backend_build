@@ -1,7 +1,9 @@
 from beanie import init_beanie
 from fastapi import FastAPI, Depends
 
+import kbb
 from kbb.app.user.db import user_db
+from kbb.kb_b.documents import ExerciseTracker, ExercisesMeta, Workouts
 from kbb.kb_b.routers import  workout_router
 from kbb.app.user.auth import current_active_user, auth_backend
 from kbb.app.user.models import User, UserCreate, UserUpdate, UserRead
@@ -50,7 +52,10 @@ async def on_startup():
     await init_beanie(
         database=user_db,
         document_models=[
-            User
+            User,
+            ExerciseTracker,
+            ExercisesMeta,
+            Workouts
         ],
     )
 
