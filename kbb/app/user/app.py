@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends
 import kbb
 from kbb.app.user.db import user_db
 from kbb.kb_b.documents import ExerciseTracker, ExercisesMeta, Workouts
-from kbb.kb_b.routers import  workout_router
+from kbb.kb_b.routers import workout_router
 from kbb.app.user.auth import current_active_user, auth_backend
 from kbb.app.user.models import User, UserCreate, UserUpdate, UserRead
 from kbb.app.user.routers import fastapi_users

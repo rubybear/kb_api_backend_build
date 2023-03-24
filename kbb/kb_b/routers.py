@@ -1,28 +1,28 @@
-from typing import List
+from typing import List, Callable, Tuple, Any, Dict, Coroutine
 
+from beanie import WriteRules
 from fastapi.encoders import jsonable_encoder
 from fastapi import APIRouter, Body, Request, HTTPException, Depends
 from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse
 
-from kbb.app.user.db import client, user_db
+from kbb.app.user.auth import fastapi_users
+from kbb.kb_b.current_user_model import CurrentUser
 from kbb.kb_b.documents import ExerciseTracker, ExercisesMeta, Workouts
-from kbb.kb_b.models import WorkoutModel, WorkoutActualModel
-from kbb.app.user.models import User, get_user_db
 
 workout_router = APIRouter()
 
-temp_workout: List[ExercisesMeta] = []
+current_active_user = fastapi_users.current_user(active=True, verified=True)
 
 
 @workout_router.post("/create_workout", response_description="Create the exercises that make up a workout",
                      response_model=Workouts)
-async def create_new_workout(workout: Workouts):
-    await workout.create()
+async def create_new_workout(workout: Workouts, user=Depends(current_active_user)):
+    workout.user = user.email
+    await workout.save(link_rule=WriteRules.WRITE)
     new_workout = await workout.get(workout.id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=new_workout.json())
-
 
 @workout_router.post("/track", response_description="TEST", response_model=ExerciseTracker)
 async def create_exercise2(exercise: ExerciseTracker):
